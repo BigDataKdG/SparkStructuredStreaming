@@ -21,13 +21,6 @@ public class Main {
                 .option("startingOffsets", "earliest")
                 .load();
 
-
-       // ds1.createOrReplaceTempView("test");
-       // Dataset<Row> wegTeSchrijven = spark.sql("select * from test");
-
-
-       // ds1.selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)");
-
         StreamingQuery query = ds1.writeStream()
                 .format("parquet")
                 .option("checkpointLocation", "test2")

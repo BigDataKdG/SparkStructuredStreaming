@@ -42,7 +42,7 @@ public class KafkaProducer {
     private static List<ContainerMelding> retrieveMeldingenFromDatabase(int counter) throws SQLException {
         List<ContainerMelding> meldingenList = new ArrayList<>();
         String sql =
-                "SELECT * FROM public.container LIMIT ? OFFSET ?";
+                "SELECT * FROM public.container WHERE to_date(SPLIT_PART(public.container.datum_tijdstip_containeractiviteit, ' ',1), 'YYYY/MM/DD') = '2018/12/05'  LIMIT ? OFFSET ?";
         Connection con = DriverManager.getConnection(jdbcUrl, username, password);
         PreparedStatement st = con.prepareStatement(sql);
         st.setInt(1, 50);

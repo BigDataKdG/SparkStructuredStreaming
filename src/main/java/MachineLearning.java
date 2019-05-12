@@ -21,16 +21,6 @@ public class MachineLearning {
                 .setInputCols(new String[]{"telling_sinds_lediging", "telling"})
                 .setOutputCol("features");
 
-
-        /*StructType schema = new StructType(new StructField[]{
-                new StructField("datum", DataTypes.DateType, true, Metadata.empty()),
-                new StructField("container_nr", DataTypes.IntegerType, true, Metadata.empty()),
-                new StructField("container_afvaltype", DataTypes.IntegerType, true, Metadata.empty()),
-                new StructField("lediging_24h_later", DataTypes.IntegerType, true, Metadata.empty()),
-                new StructField("telling_sinds_lediging", DataTypes.IntegerType, true, Metadata.empty()),
-                new StructField("telling", DataTypes.IntegerType, true, Metadata.empty()),
-                new StructField("label", DataTypes.DoubleType, true, Metadata.empty())
-        });*/
         Dataset<Row> training = spark.read()
                 .option("header", true)
                 .format("csv")

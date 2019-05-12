@@ -23,16 +23,11 @@ public class CustomKafkaConsumer {
                 .config("spark.master", "local")
                 .getOrCreate();
 
-        StructType schema = new StructType()
-                .add("containerActiviteit", DataTypes.StringType)
-                .add("containerNummer", DataTypes.StringType)
-                .add("containerMeldingCategorie", DataTypes.StringType);
-
-        Dataset<Row> parquet = spark.read().parquet("/tmp/part-00000-f6433dfc-ea36-4ad9-875e-4daeb18a325b-c000.snappy"
+        /*Dataset<Row> parquet = spark.read().parquet("/tmp/part-00000-f6433dfc-ea36-4ad9-875e-4daeb18a325b-c000.snappy"
                 + ".parquet");
         parquet.createOrReplaceTempView("parquet");
         Dataset<Row> sql = spark.sql("SELECT * from parquet");
-        sql.show(100);
+        sql.show(100);*/
 
         spark
                 .readStream()
@@ -50,13 +45,16 @@ public class CustomKafkaConsumer {
                         + "as categorie")
                 .selectExpr("split(date, '\"')[3] as date2", "split(nummer, '\"')[2] as nummer2",
                         "split(categorie, '\"')[3] as categorie2")
-                .selectExpr("date2 as date", "split(nummer2, ':')[1] as nummer", "categorie2 as categorie")
+                .selectExpr("CAST(date2 AS TIMESTAMP) as date", "split(nummer2, ':')[1] as nummer",
+                        "categorie2 as categorie")
+                .withWatermark("date", "10 minutes")
                 .writeStream()
-                .format("parquet")
-                .option("path", "/tmp")
-                .option("checkpointLocation", "/tmp")
+                .format("console")
+                //.option("path", "/tmp")
+                //.option("checkpointLocation", "/tmp")
                 .start()
                 .awaitTermination();
+
         /*while (true) {
             ConsumerRecords<Integer, ContainerMelding> records = consumer.poll(100);
 

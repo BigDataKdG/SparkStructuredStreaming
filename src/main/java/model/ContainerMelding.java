@@ -1,6 +1,7 @@
 package model;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -9,15 +10,18 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.deser.std.DateDeserializers;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 
 public class ContainerMelding {
 
-    @JsonDeserialize(using = LocalDateDeserializer.class)
-    @JsonSerialize(using = LocalDateSerializer.class)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate containerActiviteit;
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime containerActiviteit;
 
     @JsonProperty("containerNummer")
     private Integer containerNummer;
@@ -26,7 +30,7 @@ public class ContainerMelding {
     private String containerMeldingCategorie;
 
 
-    public ContainerMelding(final LocalDate containerActiviteit,
+    public ContainerMelding(final LocalDateTime containerActiviteit,
                             final Integer containerNummer,
                             final String containerMeldingCategorie) {
         this.containerActiviteit = containerActiviteit;
@@ -79,7 +83,7 @@ public class ContainerMelding {
         return sb.toString();
     }
 
-    public LocalDate getContainerActiviteit() {
+    public LocalDateTime getContainerActiviteit() {
         return containerActiviteit;
     }
 
@@ -92,7 +96,7 @@ public class ContainerMelding {
     }
 
     public static final class Builder {
-        private LocalDate containerActiviteit;
+        private LocalDateTime containerActiviteit;
         private Integer containerNummer;
         private String containerMeldingCategorie;
 
@@ -103,7 +107,7 @@ public class ContainerMelding {
             return new Builder();
         }
 
-        public Builder containerActiviteit(LocalDate containerActiviteit) {
+        public Builder containerActiviteit(LocalDateTime containerActiviteit) {
             this.containerActiviteit = containerActiviteit;
             return this;
         }

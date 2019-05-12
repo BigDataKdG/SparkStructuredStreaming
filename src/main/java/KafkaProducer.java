@@ -52,7 +52,7 @@ public class KafkaProducer {
         try {
             while (rs.next()) {
                 meldingenList.add(ContainerMelding.builder()
-                        .containerActiviteit(rs.getDate("datum_tijdstip_containeractiviteit").toLocalDate())
+                        .containerActiviteit(rs.getTimestamp("datum_tijdstip_containeractiviteit").toLocalDateTime())
                         .containerNummer(rs.getInt("container_nr"))
                         .containerMeldingCategorie(rs.getString("containermelding_categorie_code"))
                         .build());

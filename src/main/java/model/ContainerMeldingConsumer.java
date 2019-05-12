@@ -1,6 +1,6 @@
 package model;
 
-import java.util.Date;
+import java.sql.Timestamp;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -12,9 +12,9 @@ import com.fasterxml.jackson.databind.deser.std.DateDeserializers;
 
 public class ContainerMeldingConsumer {
 
-    @JsonDeserialize(using = DateDeserializers.DateDeserializer.class)
+    @JsonDeserialize(using = DateDeserializers.TimestampDeserializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private Date containerActiviteit;
+    private Timestamp containerActiviteit;
 
     @JsonProperty("containerNummer")
     private Integer containerNummer;
@@ -23,7 +23,7 @@ public class ContainerMeldingConsumer {
     private String containerMeldingCategorie;
 
 
-    public ContainerMeldingConsumer(final Date containerActiviteit,
+    public ContainerMeldingConsumer(final Timestamp containerActiviteit,
                             final Integer containerNummer,
                             final String containerMeldingCategorie) {
         this.containerActiviteit = containerActiviteit;
@@ -76,7 +76,7 @@ public class ContainerMeldingConsumer {
         return sb.toString();
     }
 
-    public Date getContainerActiviteit() {
+    public Timestamp getContainerActiviteit() {
         return containerActiviteit;
     }
 
@@ -89,7 +89,7 @@ public class ContainerMeldingConsumer {
     }
 
     public static final class Builder {
-        private Date containerActiviteit;
+        private Timestamp containerActiviteit;
         private Integer containerNummer;
         private String containerMeldingCategorie;
 
@@ -100,7 +100,7 @@ public class ContainerMeldingConsumer {
             return new Builder();
         }
 
-        public Builder containerActiviteit(Date containerActiviteit) {
+        public Builder containerActiviteit(Timestamp containerActiviteit) {
             this.containerActiviteit = containerActiviteit;
             return this;
         }

@@ -54,7 +54,6 @@ public class KafkaProducer {
                 meldingenList.add(ContainerMelding.builder()
                         .containerActiviteit(rs.getDate("datum_tijdstip_containeractiviteit").toLocalDate())
                         .containerNummer(rs.getInt("container_nr"))
-                        .afvaltype(rs.getString("container_afvaltype"))
                         .containerMeldingCategorie(rs.getString("containermelding_categorie_code"))
                         .build());
             }

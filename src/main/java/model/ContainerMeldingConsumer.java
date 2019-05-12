@@ -1,6 +1,6 @@
 package model;
 
-import java.time.LocalDate;
+import java.util.Date;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -8,16 +8,13 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import com.fasterxml.jackson.databind.deser.std.DateDeserializers;
 
-public class ContainerMelding {
+public class ContainerMeldingConsumer {
 
-    @JsonDeserialize(using = LocalDateDeserializer.class)
-    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonDeserialize(using = DateDeserializers.DateDeserializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate containerActiviteit;
+    private Date containerActiviteit;
 
     @JsonProperty("containerNummer")
     private Integer containerNummer;
@@ -26,7 +23,7 @@ public class ContainerMelding {
     private String containerMeldingCategorie;
 
 
-    public ContainerMelding(final LocalDate containerActiviteit,
+    public ContainerMeldingConsumer(final Date containerActiviteit,
                             final Integer containerNummer,
                             final String containerMeldingCategorie) {
         this.containerActiviteit = containerActiviteit;
@@ -34,7 +31,7 @@ public class ContainerMelding {
         this.containerMeldingCategorie = containerMeldingCategorie;
     }
 
-    public ContainerMelding() {
+    public ContainerMeldingConsumer() {
     }
 
     public static Builder builder() {
@@ -52,7 +49,7 @@ public class ContainerMelding {
         if (obj.getClass() != getClass()) {
             return false;
         }
-        ContainerMelding rhs = (ContainerMelding) obj;
+        ContainerMeldingConsumer rhs = (ContainerMeldingConsumer) obj;
         return new EqualsBuilder()
                 .append(this.containerActiviteit, rhs.containerActiviteit)
                 .append(this.containerNummer, rhs.containerNummer)
@@ -79,7 +76,7 @@ public class ContainerMelding {
         return sb.toString();
     }
 
-    public LocalDate getContainerActiviteit() {
+    public Date getContainerActiviteit() {
         return containerActiviteit;
     }
 
@@ -92,7 +89,7 @@ public class ContainerMelding {
     }
 
     public static final class Builder {
-        private LocalDate containerActiviteit;
+        private Date containerActiviteit;
         private Integer containerNummer;
         private String containerMeldingCategorie;
 
@@ -103,7 +100,7 @@ public class ContainerMelding {
             return new Builder();
         }
 
-        public Builder containerActiviteit(LocalDate containerActiviteit) {
+        public Builder containerActiviteit(Date containerActiviteit) {
             this.containerActiviteit = containerActiviteit;
             return this;
         }
@@ -118,8 +115,8 @@ public class ContainerMelding {
             return this;
         }
 
-        public ContainerMelding build() {
-            return new ContainerMelding(containerActiviteit, containerNummer, containerMeldingCategorie);
+        public ContainerMeldingConsumer build() {
+            return new ContainerMeldingConsumer(containerActiviteit, containerNummer, containerMeldingCategorie);
         }
     }
 }

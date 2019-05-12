@@ -70,7 +70,7 @@ public class MachineLearning {
         BinaryLogisticRegressionSummary binarySummary =
                 (BinaryLogisticRegressionSummary) trainingSummary;
         Dataset<Row> roc = binarySummary.roc();
-        binarySummary.predictions().show(10000);
+        binarySummary.predictions().sort("prediction").filter("prediction > 0").show(10000);
         System.out.println(roc);
         System.out.println(binarySummary.areaUnderROC());
     }

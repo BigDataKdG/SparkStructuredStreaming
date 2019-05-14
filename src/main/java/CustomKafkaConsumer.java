@@ -1,7 +1,11 @@
 import org.apache.spark.sql.Column;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.functions;
 import org.apache.spark.sql.streaming.OutputMode;
+import org.apache.spark.sql.streaming.StreamingQuery;
+import org.apache.spark.sql.streaming.Trigger;
 
 public class CustomKafkaConsumer {
     private final static String TOPIC = "test";
@@ -20,12 +24,13 @@ public class CustomKafkaConsumer {
         Dataset<Row> sql = spark.sql("SELECT * from parquet");
         sql.show(100);*/
 
-        spark.readStream()
+        Dataset<Row> df = spark.readStream()
                 .format("kafka")
                 .option("kafka.bootstrap.servers", BOOTSTRAP_SERVER)
                 .option("subscribe", "test")
+                .option("startingOffsets", "latest")
                 .option("group.id", "test")
-                .option("failOnDataLoss", false)
+                //.option("failOnDataLoss", false)
                 .option("key.deserializer", "org.apache.kafka.common.serialization.IntegerDeserializer")
                 .option("value.deserializer", "org.apache.kafka.common.serialization.StringSerializer")
                 .load()
@@ -38,27 +43,15 @@ public class CustomKafkaConsumer {
                 .selectExpr("CAST(date2 AS TIMESTAMP) as timestamp", "split(nummer2, ':')[1] as container_nummer",
                         "categorie2 as categorie", "CAST(date2 AS DATE) as date")
                 //.where("categorie == 'STRT'")
-                .withWatermark("timestamp", "10 minutes")
+                .withWatermark("timestamp", "3 minutes")
                 .groupBy(
-                        functions.window(new Column("timestamp"), "720 minutes", "720 minutes")
-                        )
-                .count()
-                .writeStream()
-                .format("console")
-                //.option("path", "/tmp")
-                //.option("checkpointLocation", "/tmp")
-                .start()
-                .awaitTermination();
+                        functions.window(new Column("timestamp"), "1440 minutes", "1440 minutes"),
+                        new Column("container_nummer"))
+                .count();
 
-        /*while (true) {
-            ConsumerRecords<Integer, ContainerMelding> records = consumer.poll(100);
+        StreamingQuery query = Query.startQuery(df);
 
-            for (ConsumerRecord<Integer, ContainerMelding> record : records) {
-                System.out.printf("offset = %d, key = %s, value = %s%n", record.offset(), record.key(), record.value());
-
-            }
-        }*/
-
+        query.awaitTermination();
     }
 
 }

@@ -34,7 +34,7 @@ public class KafkaProducer {
         int counter = 0;
         while (true) {
             sendToKafka(retrieveMeldingenFromDatabase(counter), kafkaProducer);
-            Thread.sleep(10000);
+            Thread.sleep(15000);
             counter += 50;
         }
     }
@@ -42,7 +42,11 @@ public class KafkaProducer {
     private static List<ContainerMelding> retrieveMeldingenFromDatabase(int counter) throws SQLException {
         List<ContainerMelding> meldingenList = new ArrayList<>();
         String sql =
-                "SELECT * FROM public.container WHERE to_date(SPLIT_PART(public.container.datum_tijdstip_containeractiviteit, ' ',1), 'YYYY/MM/DD') = '2018/12/05'  LIMIT ? OFFSET ?";
+                "SELECT * FROM public.container WHERE (to_date(SPLIT_PART(public.container"
+                        + ".datum_tijdstip_containeractiviteit, ' ',1), 'YYYY/MM/DD') = '2018/12/05' OR to_date"
+                        + "(SPLIT_PART(public.container.datum_tijdstip_containeractiviteit, ' ',1), 'YYYY/MM/DD') = "
+                        + "'2018/12/06') AND containermelding_categorie_code = 'STRT' AND (container_nr = '466' OR container_nr = '42') LIMIT ? OFFSET ?";
+
         Connection con = DriverManager.getConnection(jdbcUrl, username, password);
         PreparedStatement st = con.prepareStatement(sql);
         st.setInt(1, 50);

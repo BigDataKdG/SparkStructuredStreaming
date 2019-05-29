@@ -34,7 +34,7 @@ public class KafkaProducer {
         int counter = 0;
         while (true) {
             sendToKafka(retrieveMeldingenFromDatabase(counter), kafkaProducer);
-            Thread.sleep(15000);
+            //Thread.sleep(1000);
             counter += 50;
         }
     }
@@ -72,7 +72,6 @@ public class KafkaProducer {
         for (ContainerMelding melding : meldingenList) {
             System.out.println(melding);
             kafkaProducer.send(new ProducerRecord(TOPIC, 0, melding));
-
         }
     }
 }

@@ -3,7 +3,6 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.functions;
-import org.apache.spark.sql.streaming.OutputMode;
 import org.apache.spark.sql.streaming.StreamingQuery;
 import org.apache.spark.sql.streaming.Trigger;
 
@@ -16,6 +15,7 @@ public class CustomKafkaConsumer {
                 .builder()
                 .appName("test")
                 .config("spark.master", "local")
+                .config("spark.sql.session.timeZone", "UTC")
                 .getOrCreate();
 
         /*Dataset<Row> parquet = spark.read().parquet("/tmp/part-00000-f6433dfc-ea36-4ad9-875e-4daeb18a325b-c000.snappy"
@@ -30,7 +30,7 @@ public class CustomKafkaConsumer {
                 .option("subscribe", "test")
                 .option("startingOffsets", "latest")
                 .option("group.id", "test")
-                //.option("failOnDataLoss", false)
+                .option("failOnDataLoss", false)
                 .option("key.deserializer", "org.apache.kafka.common.serialization.IntegerDeserializer")
                 .option("value.deserializer", "org.apache.kafka.common.serialization.StringSerializer")
                 .load()
@@ -43,13 +43,18 @@ public class CustomKafkaConsumer {
                 .selectExpr("CAST(date2 AS TIMESTAMP) as timestamp", "split(nummer2, ':')[1] as container_nummer",
                         "categorie2 as categorie", "CAST(date2 AS DATE) as date")
                 //.where("categorie == 'STRT'")
-                .withWatermark("timestamp", "3 minutes")
+                .withWatermark("timestamp", "1 minutes")
                 .groupBy(
-                        functions.window(new Column("timestamp"), "1440 minutes", "1440 minutes"),
+                        functions.window(new Column("timestamp"), "1 day", "1 day"),
                         new Column("container_nummer"))
                 .count();
 
-        StreamingQuery query = Query.startQuery(df);
+        StreamingQuery query = df.writeStream()
+                .format("parquet")
+                .option("truncate", "false")
+                .trigger(Trigger.ProcessingTime(1000))
+                .option("checkpointLocation", "/tmp/kafka-logs")
+                .start("/Users/JeBo/kafka-path");
 
         query.awaitTermination();
     }

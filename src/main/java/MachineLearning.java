@@ -1,23 +1,25 @@
-import org.apache.spark.ml.classification.BinaryLogisticRegressionSummary;
-import org.apache.spark.ml.classification.LogisticRegression;
-import org.apache.spark.ml.classification.LogisticRegressionModel;
-import org.apache.spark.ml.classification.LogisticRegressionTrainingSummary;
-import org.apache.spark.ml.feature.VectorAssembler;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
-import org.apache.spark.sql.types.DataTypes;
 
 public class MachineLearning {
 
     public static void main(String[] args) {
+
+
         SparkSession spark = SparkSession
                 .builder()
                 .appName("test")
                 .config("spark.master", "local")
+                .config("spark.sql.session.timeZone", "UTC")
                 .getOrCreate();
 
-        VectorAssembler assembler = new VectorAssembler()
+        Dataset<Row> df = spark.read()
+                .parquet("/Users/JeBo/kafka-path/part-00000-dd416263-8db1-4166-b243-caba470adac7-c000.snappy.parquet");
+
+        df.explain();
+        df.show(20);
+        /*VectorAssembler assembler = new VectorAssembler()
                 .setInputCols(new String[]{"telling_sinds_lediging", "telling"})
                 .setOutputCol("features");
 
@@ -62,7 +64,7 @@ public class MachineLearning {
         Dataset<Row> roc = binarySummary.roc();
         binarySummary.predictions().sort("prediction").filter("prediction > 0").show(10000);
         System.out.println(roc);
-        System.out.println(binarySummary.areaUnderROC());
+        System.out.println(binarySummary.areaUnderROC());*/
     }
 
 }

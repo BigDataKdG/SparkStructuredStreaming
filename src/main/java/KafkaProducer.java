@@ -42,15 +42,17 @@ public class KafkaProducer {
     private static List<ContainerMelding> retrieveMeldingenFromDatabase(int counter) throws SQLException {
         List<ContainerMelding> meldingenList = new ArrayList<>();
         String sql =
-                "SELECT * FROM public.container WHERE (to_date(SPLIT_PART(public.container"
+                "SELECT distinct * FROM public.container WHERE (to_date(SPLIT_PART(public.container"
                         + ".datum_tijdstip_containeractiviteit, ' ',1), 'YYYY/MM/DD') = '2018/12/05' OR to_date"
                         + "(SPLIT_PART(public.container.datum_tijdstip_containeractiviteit, ' ',1), 'YYYY/MM/DD') = "
-                        + "'2018/12/06') AND containermelding_categorie_code = 'STRT' AND (container_nr = '466' OR container_nr = '42') LIMIT ? OFFSET ?";
+                        + "'2018/12/06' OR to_date(SPLIT_PART(public.container.datum_tijdstip_containeractiviteit, '"
+                        + " ',1), 'YYYY/MM/DD') = '2018/12/07') AND containermelding_categorie_code = 'STRT' AND "
+                        + "(container_nr = '466')";
 
         Connection con = DriverManager.getConnection(jdbcUrl, username, password);
         PreparedStatement st = con.prepareStatement(sql);
-        st.setInt(1, 50);
-        st.setInt(2, counter);
+        //st.setInt(1, 50);
+        //st.setInt(2, counter);
         ResultSet rs = st.executeQuery();
 
         try {
@@ -67,8 +69,9 @@ public class KafkaProducer {
         return meldingenList;
     }
 
-    private static void sendToKafka(List<ContainerMelding> meldingenList,
-                                    final Producer<Integer, ContainerMelding> kafkaProducer) {
+    private static void sendToKafka(
+            List<ContainerMelding> meldingenList,
+            final Producer<Integer, ContainerMelding> kafkaProducer) {
         for (ContainerMelding melding : meldingenList) {
             System.out.println(melding);
             kafkaProducer.send(new ProducerRecord(TOPIC, 0, melding));

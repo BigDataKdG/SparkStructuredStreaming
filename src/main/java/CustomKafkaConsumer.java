@@ -50,9 +50,13 @@ public class CustomKafkaConsumer {
                 .count();
 
         StreamingQuery query = df.writeStream()
+               /* .format("console")
+                .option("numRows", 1000)
+                .option("truncate", false)
+                .outputMode("complete")
+                .start();*/
                 .format("parquet")
                 .option("truncate", "false")
-                .trigger(Trigger.ProcessingTime(1000))
                 .option("checkpointLocation", "/tmp/kafka-logs")
                 .start("/Users/JeBo/kafka-path");
 

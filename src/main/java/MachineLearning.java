@@ -4,7 +4,7 @@ import org.apache.spark.sql.SparkSession;
 
 public class MachineLearning {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
 
         SparkSession spark = SparkSession
@@ -14,11 +14,12 @@ public class MachineLearning {
                 .config("spark.sql.session.timeZone", "UTC")
                 .getOrCreate();
 
-        Dataset<Row> df = spark.read()
-                .parquet("/Users/JeBo/kafka-path/part-00000-dd416263-8db1-4166-b243-caba470adac7-c000.snappy.parquet");
+        Dataset<Row> df = spark.read().parquet("/Users/JeBo/kafka-path/part-*.snappy.parquet");
+        df.coalesce(1).write()
+                .format("parquet").save("/Users/JeBo/single-parquet/single-file.snappy.parquet");
 
-        df.explain();
-        df.show(20);
+        /*df.explain();
+        df.show(20);*/
         /*VectorAssembler assembler = new VectorAssembler()
                 .setInputCols(new String[]{"telling_sinds_lediging", "telling"})
                 .setOutputCol("features");

@@ -1,4 +1,4 @@
-datum,container_nr,container_afvaltype,lediging_24h_later,telling_sinds_lediging,telling
+datum,containerNummer,container_afvaltype,lediging_24h_later,telling_sinds_lediging,telling
 2019-04-09,001,Rest,0,10,10
 2019-04-10,001,Rest,0,6,6
 2019-04-11,001,Rest,0,12,6

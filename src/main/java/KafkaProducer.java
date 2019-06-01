@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -72,6 +73,10 @@ public class KafkaProducer {
     private static void sendToKafka(
             List<ContainerMelding> meldingenList,
             final Producer<Integer, ContainerMelding> kafkaProducer) {
+        List<ContainerMelding> newList =
+                meldingenList.stream().filter(melding -> melding.getContainerMeldingCategorie().equals("LEDI"))
+                .collect(Collectors.toList());
+
         for (ContainerMelding melding : meldingenList) {
             System.out.println(melding);
             kafkaProducer.send(new ProducerRecord(TOPIC, 0, melding));

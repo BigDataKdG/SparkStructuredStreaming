@@ -33,6 +33,9 @@ public class LedigingenModel {
         this.containerNummer = containerNummer;
     }
 
+    public LedigingenModel() {
+    }
+
     public void setStartDate(final LocalDate startDate) {
         this.startDate = startDate;
     }

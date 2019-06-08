@@ -3,12 +3,9 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import java.util.stream.Collectors;
 
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -33,49 +30,63 @@ public class KafkaProducer {
         Producer<Integer, ContainerMelding> kafkaProducer =
                 new org.apache.kafka.clients.producer.KafkaProducer(props);
         int counter = 0;
-        while (true) {
-            sendToKafka(retrieveMeldingenFromDatabase(counter), kafkaProducer);
-            //Thread.sleep(1000);
-            counter += 50;
-        }
+        sendToKafka(retrieveMeldingenFromDatabase(counter), kafkaProducer);
+        //Thread.sleep(1000);
+        //counter += 50;
+
     }
 
     private static List<ContainerMelding> retrieveMeldingenFromDatabase(int counter) throws SQLException {
         List<ContainerMelding> meldingenList = new ArrayList<>();
-        String sql =
-                "SELECT distinct * FROM public.container WHERE (to_date(SPLIT_PART(public.container"
-                        + ".datum_tijdstip_containeractiviteit, ' ',1), 'YYYY/MM/DD') = '2018/12/05' OR to_date"
-                        + "(SPLIT_PART(public.container.datum_tijdstip_containeractiviteit, ' ',1), 'YYYY/MM/DD') = "
-                        + "'2018/12/06' OR to_date(SPLIT_PART(public.container.datum_tijdstip_containeractiviteit, '"
-                        + " ',1), 'YYYY/MM/DD') = '2018/12/07') AND containermelding_categorie_code = 'STRT' AND "
-                        + "(container_nr = '466')";
+        String stortingen =
+                "SELECT distinct * FROM public.container WHERE to_date(SPLIT_PART(public.container"
+                        + ".datum_tijdstip_containeractiviteit, ' ',1), 'YYYY/MM/DD') BETWEEN"
+        + "'2018/03/13' AND '2018/03/27' AND (containermelding_id = '20' AND container_nr = '466')";
+
+        String ledigingen =
+                "SELECT distinct * FROM public.container WHERE to_date(SPLIT_PART(public.container.datum_tijdstip_containeractiviteit, ' ', 1), 'YYYY/MM/DD') BETWEEN '2018/03/01' AND '2018/03/30'"
+        + "AND (containermelding_id = '11' OR containermelding_id = '77') AND container_nr = '466'";
 
         Connection con = DriverManager.getConnection(jdbcUrl, username, password);
-        PreparedStatement st = con.prepareStatement(sql);
+        PreparedStatement st = con.prepareStatement(stortingen);
+        PreparedStatement st2 = con.prepareStatement(ledigingen);
         //st.setInt(1, 50);
         //st.setInt(2, counter);
         ResultSet rs = st.executeQuery();
+        ResultSet rs2 = st2.executeQuery();
 
         try {
             while (rs.next()) {
                 meldingenList.add(ContainerMelding.builder()
                         .containerActiviteit(rs.getTimestamp("datum_tijdstip_containeractiviteit").toLocalDateTime())
                         .containerNummer(rs.getInt("container_nr"))
-                        .containerMeldingCategorie(rs.getString("containermelding_categorie_code"))
+                        .dayOfWeek(rs.getTimestamp("datum_tijdstip_containeractiviteit").toLocalDateTime().getDayOfWeek().getValue())
+                        .containerMeldingId(rs.getInt("containermelding_id"))
                         .build());
             }
         } catch (Exception ex) {
 
         }
+
+        try {
+            while (rs2.next()) {
+                meldingenList.add(ContainerMelding.builder()
+                        .containerActiviteit(rs2.getTimestamp("datum_tijdstip_containeractiviteit").toLocalDateTime())
+                        .containerNummer(rs2.getInt("container_nr"))
+                        .dayOfWeek(rs2.getTimestamp("datum_tijdstip_containeractiviteit").toLocalDateTime().getDayOfWeek().getValue())
+                        .containerMeldingId(rs2.getInt("containermelding_id"))
+                        .build());
+            }
+        } catch (Exception ex) {
+
+        }
+
         return meldingenList;
     }
 
     private static void sendToKafka(
             List<ContainerMelding> meldingenList,
             final Producer<Integer, ContainerMelding> kafkaProducer) {
-        List<ContainerMelding> newList =
-                meldingenList.stream().filter(melding -> melding.getContainerMeldingCategorie().equals("LEDI"))
-                .collect(Collectors.toList());
 
         for (ContainerMelding melding : meldingenList) {
             System.out.println(melding);

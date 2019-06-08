@@ -1,9 +1,7 @@
 package model;
 
 import java.time.LocalDateTime;
-
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -22,16 +20,19 @@ public class ContainerMelding {
     @JsonProperty("containerNummer")
     private Integer containerNummer;
 
-    @JsonProperty("containerMeldingCategorie")
-    private String containerMeldingCategorie;
+    @JsonProperty Integer containerMeldingId;
 
+    @JsonProperty("dayOfWeek")
+    private Integer dayOfWeek;
 
     public ContainerMelding(final LocalDateTime containerActiviteit,
                             final Integer containerNummer,
-                            final String containerMeldingCategorie) {
+                            final Integer containerMeldingId,
+                            final Integer dayOfWeek) {
         this.containerActiviteit = containerActiviteit;
         this.containerNummer = containerNummer;
-        this.containerMeldingCategorie = containerMeldingCategorie;
+        this.containerMeldingId = containerMeldingId;
+        this.dayOfWeek = dayOfWeek;
     }
 
     public ContainerMelding() {
@@ -39,44 +40,6 @@ public class ContainerMelding {
 
     public static Builder builder() {
         return new Builder();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (obj == this) {
-            return true;
-        }
-        if (obj.getClass() != getClass()) {
-            return false;
-        }
-        ContainerMelding rhs = (ContainerMelding) obj;
-        return new EqualsBuilder()
-                .append(this.containerActiviteit, rhs.containerActiviteit)
-                .append(this.containerNummer, rhs.containerNummer)
-                .append(this.containerMeldingCategorie, rhs.containerMeldingCategorie)
-                .isEquals();
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder()
-                .append(containerActiviteit)
-                .append(containerNummer)
-                .append(containerMeldingCategorie)
-                .toHashCode();
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("ContainerMelding{");
-        sb.append("containerActiviteit=").append(containerActiviteit);
-        sb.append(", containerNummer=").append(containerNummer);
-        sb.append(", containerMeldingCategorie='").append(containerMeldingCategorie).append('\'');
-        sb.append('}');
-        return sb.toString();
     }
 
     public LocalDateTime getContainerActiviteit() {
@@ -87,19 +50,56 @@ public class ContainerMelding {
         return containerNummer;
     }
 
-    public String getContainerMeldingCategorie() {
-        return containerMeldingCategorie;
+    public Integer getDayOfWeek() {
+        return dayOfWeek;
     }
 
+    public Integer getContainerMeldingId() {
+        return containerMeldingId;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final ContainerMelding that = (ContainerMelding) o;
+        return dayOfWeek == that.dayOfWeek &&
+                Objects.equals(containerActiviteit, that.containerActiviteit) &&
+                Objects.equals(containerNummer, that.containerNummer) &&
+                Objects.equals(containerMeldingId, that.containerMeldingId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(containerActiviteit, containerNummer, containerMeldingId,dayOfWeek);
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("ContainerMelding{");
+        sb.append("containerActiviteit=").append(containerActiviteit);
+        sb.append(", containerNummer=").append(containerNummer);
+        sb.append(", containerMeldingId=").append(containerMeldingId);
+        sb.append(", dayOfWeek=").append(dayOfWeek);
+        sb.append('}');
+        return sb.toString();
+    }
+
+
     public static final class Builder {
+        Integer containerMeldingId;
         private LocalDateTime containerActiviteit;
         private Integer containerNummer;
-        private String containerMeldingCategorie;
+        private Integer dayOfWeek;
 
         private Builder() {
         }
 
-        public static Builder aContainer() {
+        public static Builder aContainerMelding() {
             return new Builder();
         }
 
@@ -113,13 +113,18 @@ public class ContainerMelding {
             return this;
         }
 
-        public Builder containerMeldingCategorie(String containerMeldingCategorie) {
-            this.containerMeldingCategorie = containerMeldingCategorie;
+        public Builder containerMeldingId(Integer containerMeldingId) {
+            this.containerMeldingId = containerMeldingId;
+            return this;
+        }
+
+        public Builder dayOfWeek(Integer dayOfWeek) {
+            this.dayOfWeek = dayOfWeek;
             return this;
         }
 
         public ContainerMelding build() {
-            return new ContainerMelding(containerActiviteit, containerNummer, containerMeldingCategorie);
+            return new ContainerMelding(containerActiviteit, containerNummer, containerMeldingId, dayOfWeek);
         }
     }
 }

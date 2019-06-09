@@ -9,46 +9,25 @@ public class MachineLearningDomain {
     @JsonProperty("containerNummer")
     private String containerNummer;
 
-    @JsonProperty("afvaltype")
-    private String afvaltype;
-
     @JsonProperty("volume")
     private Long volume;
 
     @JsonProperty("volumeSindsLaatsteLediging")
     private Long volumeSindsLaatsteLediging;
 
-    @JsonProperty("verplicht")
-    private Integer verplicht;
+    @JsonProperty("dayOfWeek")
+    private Integer dayOfWeek;
 
-    @JsonProperty("aantalInwoners")
-    private Integer aantalInwoners;
-
-    @JsonProperty("dagWeek")
-    private Integer dagWeek;
-
-    @JsonProperty("ledigingDag")
-    private Integer ledigingDag;
-
-    public MachineLearningDomain(final String containerNummer, final String afvaltype, final Long volume,
-                                 final Long volumeSindsLaatsteLediging, final Integer verplicht,
-                                 final Integer aantalInwoners, final Integer dagWeek, final Integer ledigingDag) {
+    public MachineLearningDomain(final String containerNummer, final Long volume,
+                                 final Long volumeSindsLaatsteLediging, final Integer dayOfWeek) {
         this.containerNummer = containerNummer;
-        this.afvaltype = afvaltype;
         this.volume = volume;
         this.volumeSindsLaatsteLediging = volumeSindsLaatsteLediging;
-        this.verplicht = verplicht;
-        this.aantalInwoners = aantalInwoners;
-        this.dagWeek = dagWeek;
-        this.ledigingDag = ledigingDag;
+        this.dayOfWeek = dayOfWeek;
     }
 
     public String getContainerNummer() {
         return containerNummer;
-    }
-
-    public String getAfvaltype() {
-        return afvaltype;
     }
 
     public Long getVolume() {
@@ -59,35 +38,8 @@ public class MachineLearningDomain {
         return volumeSindsLaatsteLediging;
     }
 
-    public Integer getVerplicht() {
-        return verplicht;
-    }
-
-    public Integer getAantalInwoners() {
-        return aantalInwoners;
-    }
-
-    public Integer getDagWeek() {
-        return dagWeek;
-    }
-
-    public Integer getLedigingDag() {
-        return ledigingDag;
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("MachineLearningDomain{");
-        sb.append("containerNummer='").append(containerNummer).append('\'');
-        sb.append(", afvaltype='").append(afvaltype).append('\'');
-        sb.append(", volume=").append(volume);
-        sb.append(", volumeSindsLaatsteLediging=").append(volumeSindsLaatsteLediging);
-        sb.append(", verplicht=").append(verplicht);
-        sb.append(", aantalInwoners=").append(aantalInwoners);
-        sb.append(", dagWeek=").append(dagWeek);
-        sb.append(", ledigingDag=").append(ledigingDag);
-        sb.append('}');
-        return sb.toString();
+    public Integer getDayOfWeek() {
+        return dayOfWeek;
     }
 
     @Override
@@ -100,18 +52,25 @@ public class MachineLearningDomain {
         }
         final MachineLearningDomain that = (MachineLearningDomain) o;
         return Objects.equals(containerNummer, that.containerNummer) &&
-                Objects.equals(afvaltype, that.afvaltype) &&
                 Objects.equals(volume, that.volume) &&
                 Objects.equals(volumeSindsLaatsteLediging, that.volumeSindsLaatsteLediging) &&
-                Objects.equals(verplicht, that.verplicht) &&
-                Objects.equals(aantalInwoners, that.aantalInwoners) &&
-                Objects.equals(dagWeek, that.dagWeek) &&
-                Objects.equals(ledigingDag, that.ledigingDag);
+                Objects.equals(dayOfWeek, that.dayOfWeek);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(containerNummer, afvaltype, volume, volumeSindsLaatsteLediging, verplicht, aantalInwoners, dagWeek, ledigingDag);
+        return Objects.hash(containerNummer, volume, volumeSindsLaatsteLediging, dayOfWeek);
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("MachineLearningDomain{");
+        sb.append("containerNummer='").append(containerNummer).append('\'');
+        sb.append(", volume=").append(volume);
+        sb.append(", volumeSindsLaatsteLediging=").append(volumeSindsLaatsteLediging);
+        sb.append(", dayOfWeek=").append(dayOfWeek);
+        sb.append('}');
+        return sb.toString();
     }
 
     public static Builder builder() {
@@ -120,28 +79,19 @@ public class MachineLearningDomain {
 
     public static final class Builder {
         private String containerNummer;
-        private String afvaltype;
         private Long volume;
         private Long volumeSindsLaatsteLediging;
-        private Integer verplicht;
-        private Integer aantalInwoners;
-        private Integer dagWeek;
-        private Integer ledigingDag;
+        private Integer dayOfWeek;
 
         private Builder() {
         }
 
-        public static Builder aMachineLearningModel() {
+        public static Builder aMachineLearningDomain() {
             return new Builder();
         }
 
         public Builder containerNummer(String containerNummer) {
             this.containerNummer = containerNummer;
-            return this;
-        }
-
-        public Builder afvaltype(String afvaltype) {
-            this.afvaltype = afvaltype;
             return this;
         }
 
@@ -155,28 +105,13 @@ public class MachineLearningDomain {
             return this;
         }
 
-        public Builder verplicht(Integer verplicht) {
-            this.verplicht = verplicht;
-            return this;
-        }
-
-        public Builder aantalInwoners(Integer aantalInwoners) {
-            this.aantalInwoners = aantalInwoners;
-            return this;
-        }
-
-        public Builder dagWeek(Integer dagWeek) {
-            this.dagWeek = dagWeek;
-            return this;
-        }
-
-        public Builder ledigingDag(Integer ledigingDag) {
-            this.ledigingDag = ledigingDag;
+        public Builder dayOfWeek(Integer dayOfWeek) {
+            this.dayOfWeek = dayOfWeek;
             return this;
         }
 
         public MachineLearningDomain build() {
-            return new MachineLearningDomain(containerNummer, afvaltype, volume, volumeSindsLaatsteLediging, verplicht, aantalInwoners, dagWeek, ledigingDag);
+            return new MachineLearningDomain(containerNummer, volume, volumeSindsLaatsteLediging, dayOfWeek);
         }
     }
 }

@@ -14,7 +14,9 @@ import model.ContainerMelding;
 
 
 public class KafkaProducer {
-    private final static String TOPIC = "test";
+    private final static String STORTINGEN_TOPIC = "stortingen";
+    private final static String LEDIGINGEN_TOPIC = "ledigingen";
+
     private final static String BOOTSTRAP_SERVER = "localhost:9092";
     private final static String jdbcUrl = "jdbc:postgresql://localhost:5432/sorteertstraatjes";
     private final static String username = "postgres";
@@ -30,34 +32,27 @@ public class KafkaProducer {
         Producer<Integer, ContainerMelding> kafkaProducer =
                 new org.apache.kafka.clients.producer.KafkaProducer(props);
         int counter = 0;
-        sendToKafka(retrieveMeldingenFromDatabase(counter), kafkaProducer);
-        //Thread.sleep(1000);
-        //counter += 50;
+        sendLedigingenToKafka(retrieveLedigingenFromDb(counter), kafkaProducer);
+        sendToKafka(retrieveStortingenFromDB(counter), kafkaProducer);
 
+        // todo: two batches
     }
 
-    private static List<ContainerMelding> retrieveMeldingenFromDatabase(int counter) throws SQLException {
-        List<ContainerMelding> meldingenList = new ArrayList<>();
+    private static List<ContainerMelding> retrieveStortingenFromDB(int counter) throws SQLException {
+        List<ContainerMelding> stortingenList = new ArrayList<>();
+
         String stortingen =
                 "SELECT distinct * FROM public.container WHERE to_date(SPLIT_PART(public.container"
                         + ".datum_tijdstip_containeractiviteit, ' ',1), 'YYYY/MM/DD') BETWEEN"
-        + "'2018/03/13' AND '2018/03/27' AND (containermelding_id = '20' AND container_nr = '466')";
-
-        String ledigingen =
-                "SELECT distinct * FROM public.container WHERE to_date(SPLIT_PART(public.container.datum_tijdstip_containeractiviteit, ' ', 1), 'YYYY/MM/DD') BETWEEN '2018/03/01' AND '2018/03/30'"
-        + "AND (containermelding_id = '11' OR containermelding_id = '77') AND container_nr = '466'";
+                        + "'2018/03/13' AND '2018/03/27' AND (containermelding_id = '20' AND container_nr = '466')";
 
         Connection con = DriverManager.getConnection(jdbcUrl, username, password);
         PreparedStatement st = con.prepareStatement(stortingen);
-        PreparedStatement st2 = con.prepareStatement(ledigingen);
-        //st.setInt(1, 50);
-        //st.setInt(2, counter);
         ResultSet rs = st.executeQuery();
-        ResultSet rs2 = st2.executeQuery();
 
         try {
             while (rs.next()) {
-                meldingenList.add(ContainerMelding.builder()
+                stortingenList.add(ContainerMelding.builder()
                         .containerActiviteit(rs.getTimestamp("datum_tijdstip_containeractiviteit").toLocalDateTime())
                         .containerNummer(rs.getInt("container_nr"))
                         .dayOfWeek(rs.getTimestamp("datum_tijdstip_containeractiviteit").toLocalDateTime().getDayOfWeek().getValue())
@@ -68,9 +63,24 @@ public class KafkaProducer {
 
         }
 
+        return stortingenList;
+    }
+    private static List<ContainerMelding> retrieveLedigingenFromDb(int counter) throws SQLException {
+        List<ContainerMelding> ledigingenList = new ArrayList<>();
+
+        String ledigingen =
+                "SELECT distinct * FROM public.container WHERE to_date(SPLIT_PART(public.container"
+                        + ".datum_tijdstip_containeractiviteit, ' ', 1), 'YYYY/MM/DD') BETWEEN '2018/03/01' AND "
+                        + "'2018/03/30'"
+                        + "AND (containermelding_id = '11' OR containermelding_id = '77') AND container_nr = '466'";
+
+        Connection con = DriverManager.getConnection(jdbcUrl, username, password);
+        PreparedStatement st2 = con.prepareStatement(ledigingen);
+        ResultSet rs2 = st2.executeQuery();
+
         try {
             while (rs2.next()) {
-                meldingenList.add(ContainerMelding.builder()
+                ledigingenList.add(ContainerMelding.builder()
                         .containerActiviteit(rs2.getTimestamp("datum_tijdstip_containeractiviteit").toLocalDateTime())
                         .containerNummer(rs2.getInt("container_nr"))
                         .dayOfWeek(rs2.getTimestamp("datum_tijdstip_containeractiviteit").toLocalDateTime().getDayOfWeek().getValue())
@@ -81,16 +91,28 @@ public class KafkaProducer {
 
         }
 
-        return meldingenList;
+        return ledigingenList;
     }
 
     private static void sendToKafka(
             List<ContainerMelding> meldingenList,
             final Producer<Integer, ContainerMelding> kafkaProducer) {
-
+        //Collections.sort(meldingenList,
+            //    (o1, o2) -> o2.getContainerActiviteit().compareTo(o1.getContainerActiviteit()));
         for (ContainerMelding melding : meldingenList) {
             System.out.println(melding);
-            kafkaProducer.send(new ProducerRecord(TOPIC, 0, melding));
+            kafkaProducer.send(new ProducerRecord(STORTINGEN_TOPIC, 0, melding));
+        }
+    }
+
+    private static void sendLedigingenToKafka(
+            List<ContainerMelding> meldingenList,
+            final Producer<Integer, ContainerMelding> kafkaProducer) {
+        //Collections.sort(meldingenList,
+        //    (o1, o2) -> o2.getContainerActiviteit().compareTo(o1.getContainerActiviteit()));
+        for (ContainerMelding melding : meldingenList) {
+            System.out.println(melding);
+            kafkaProducer.send(new ProducerRecord(LEDIGINGEN_TOPIC, 0, melding));
         }
     }
 }

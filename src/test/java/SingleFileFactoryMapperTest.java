@@ -90,9 +90,9 @@ public class SingleFileFactoryMapperTest {
             final String containerNr, final Long count, final LocalDate date,
             final String containerMeldingCategorie) {
         return StortingenModel.builder()
-                .container_nr(containerNr)
+                .containerNummer(containerNr)
                 .count(count)
-                .window(date)
+                .date(date)
                 .containerMeldingCategorie(containerMeldingCategorie)
                 .build();
     }

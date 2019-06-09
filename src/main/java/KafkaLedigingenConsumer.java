@@ -6,38 +6,34 @@ import org.apache.spark.sql.functions;
 import org.apache.spark.sql.streaming.StreamingQuery;
 import org.apache.spark.sql.streaming.Trigger;
 
-public class KafkaConsumer {
+public class KafkaLedigingenConsumer {
     private final static String BOOTSTRAP_SERVER = "localhost:9092";
 
     public static void main(String[] args) throws Exception {
         SparkSession spark = SparkSession
                 .builder()
-                .appName("stortingen")
+                .appName("test")
                 .config("spark.master", "local")
                 .config("spark.sql.session.timeZone", "UTC")
                 .getOrCreate();
 
-        Dataset<Row> stortingen = readStream(spark, 20);
+        Dataset<Row> ledigingen = readLedigingen(spark, 11);
 
-        StreamingQuery query = stortingen.writeStream()
-                /* .format("console")
-                 .option("numRows", 1000)
-                 .option("truncate", false)
-                 .outputMode("complete")
-                 .start();*/
+        StreamingQuery query2 = ledigingen.writeStream()
                 .format("parquet")
                 .option("truncate", "false")
-                .option("checkpointLocation", "/tmp/kafka-logs")
+                .option("checkpointLocation", "/tmp/kafka-logs2")
                 .trigger(Trigger.ProcessingTime(10000))
-                .start("/Users/JeBo/kafka-stortingen");
-        query.awaitTermination();
+                .start("/Users/JeBo/kafka-ledigingen");
+
+        query2.awaitTermination();
     }
 
-    private static Dataset<Row> readStream(SparkSession spark, Integer containerMeldingId) {
+    private static Dataset<Row> readLedigingen (SparkSession spark, Integer containerMeldingId){
         return spark.readStream()
                 .format("kafka")
                 .option("kafka.bootstrap.servers", BOOTSTRAP_SERVER)
-                .option("subscribe", "stortingen")
+                .option("subscribe", "ledigingen")
                 .option("startingOffsets", "latest")
                 .option("group.id", "test")
                 .option("failOnDataLoss", false)
@@ -51,7 +47,8 @@ public class KafkaConsumer {
                         "split(containerMeldingId, '\"')[2] as containerMeldingId2", "split(dayOfWeek, '\"')[2] as "
                                 + "dayOfWeek2")
                 .selectExpr("CAST(date2 AS TIMESTAMP) as timestamp", "split(nummer2, ':')[1] as container_nummer",
-                        "CAST(date2 AS DATE) as date", "split(containerMeldingId2, ':')[1] as containerMeldingId", " "
+                        "CAST(date2 AS DATE) as date", "split(containerMeldingId2, ':')[1] as containerMeldingId"
+                        , " "
                                 + "split (dayOfWeek2, ':')[1] as dayOfWeek")
                 .selectExpr("timestamp as timestamp", "container_nummer as container_nummer", "date as date",
                         "containerMeldingId as containerMeldingId", "split(dayOfWeek, '}')[0] as dayOfWeek")
@@ -64,6 +61,5 @@ public class KafkaConsumer {
                         new Column("dayOfWeek"))
                 .count();
     }
-
 
 }

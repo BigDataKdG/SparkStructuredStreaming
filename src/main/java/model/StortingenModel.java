@@ -21,12 +21,14 @@ public class StortingenModel implements Serializable {
     @JsonProperty("containerNummer")
     private String containerNummer;
 
-    @JsonProperty("count")
-    private Long count;
-
-    @JsonProperty("containerMeldingCategorie")
+    @JsonProperty("containerMeldingId")
     private String containerMeldingCategorie;
 
+    @JsonProperty("dayOfWeek")
+    private String dayOfWeek;
+
+    @JsonProperty("count")
+    private Long count;
 
     public StortingenModel() {
     }
@@ -47,6 +49,10 @@ public class StortingenModel implements Serializable {
         return containerMeldingCategorie;
     }
 
+    public String getDayOfWeek() {
+        return dayOfWeek;
+    }
+
     public void setDate(final LocalDate date) {
         this.date = date;
     }
@@ -63,15 +69,8 @@ public class StortingenModel implements Serializable {
         this.containerMeldingCategorie = containerMeldingCategorie;
     }
 
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("StortingenModel{");
-        sb.append("date=").append(date);
-        sb.append(", containerNummer='").append(containerNummer).append('\'');
-        sb.append(", count=").append(count);
-        sb.append(", containerMeldingCategorie='").append(containerMeldingCategorie).append('\'');
-        sb.append('}');
-        return sb.toString();
+    public void setDayOfWeek(final String dayOfWeek) {
+        this.dayOfWeek = dayOfWeek;
     }
 
     @Override
@@ -85,13 +84,26 @@ public class StortingenModel implements Serializable {
         final StortingenModel that = (StortingenModel) o;
         return Objects.equals(date, that.date) &&
                 Objects.equals(containerNummer, that.containerNummer) &&
-                Objects.equals(count, that.count) &&
-                Objects.equals(containerMeldingCategorie, that.containerMeldingCategorie);
+                Objects.equals(containerMeldingCategorie, that.containerMeldingCategorie) &&
+                Objects.equals(dayOfWeek, that.dayOfWeek) &&
+                Objects.equals(count, that.count);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(date, containerNummer, count, containerMeldingCategorie);
+        return Objects.hash(date, containerNummer, containerMeldingCategorie, dayOfWeek, count);
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("StortingenModel{");
+        sb.append("date=").append(date);
+        sb.append(", containerNummer='").append(containerNummer).append('\'');
+        sb.append(", containerMeldingCategorie='").append(containerMeldingCategorie).append('\'');
+        sb.append(", dayOfWeek='").append(dayOfWeek).append('\'');
+        sb.append(", count=").append(count);
+        sb.append('}');
+        return sb.toString();
     }
 
     public static Builder builder() {
@@ -100,30 +112,26 @@ public class StortingenModel implements Serializable {
 
 
     public static final class Builder {
-        private LocalDate window;
-        private String container_nr;
-        private Long count;
+        private LocalDate date;
+        private String containerNummer;
         private String containerMeldingCategorie;
+        private String dayOfWeek;
+        private Long count;
 
         private Builder() {
         }
 
-        public static Builder aMachineLearningModel() {
+        public static Builder aStortingenModel() {
             return new Builder();
         }
 
-        public Builder window(LocalDate window) {
-            this.window = window;
+        public Builder date(LocalDate date) {
+            this.date = date;
             return this;
         }
 
-        public Builder container_nr(String container_nr) {
-            this.container_nr = container_nr;
-            return this;
-        }
-
-        public Builder count(Long count) {
-            this.count = count;
+        public Builder containerNummer(String containerNummer) {
+            this.containerNummer = containerNummer;
             return this;
         }
 
@@ -132,12 +140,23 @@ public class StortingenModel implements Serializable {
             return this;
         }
 
+        public Builder dayOfWeek(String dayOfWeek) {
+            this.dayOfWeek = dayOfWeek;
+            return this;
+        }
+
+        public Builder count(Long count) {
+            this.count = count;
+            return this;
+        }
+
         public StortingenModel build() {
             StortingenModel stortingenModel = new StortingenModel();
-            stortingenModel.setDate(window);
-            stortingenModel.setContainerNummer(container_nr);
-            stortingenModel.setCount(count);
+            stortingenModel.setDate(date);
+            stortingenModel.setContainerNummer(containerNummer);
             stortingenModel.setContainerMeldingCategorie(containerMeldingCategorie);
+            stortingenModel.setDayOfWeek(dayOfWeek);
+            stortingenModel.setCount(count);
             return stortingenModel;
         }
     }

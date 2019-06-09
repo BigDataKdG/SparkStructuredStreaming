@@ -29,20 +29,22 @@ public class MachineLearningService {
 
         Dataset<Row> df = spark.read()
                 .parquet("/Users/JeBo/single-parquet/single-file-stortingen.snappy.parquet")
-                .toDF("window", "container_nr", "count");
+                .toDF("window", "container_nr", "containerMeldingId", "dayOfWeek", "count");
 
         Dataset<Row> ledigingen = spark.read()
                 .parquet("/Users/JeBo/single-parquet/single-file-ledigingen.snappy.parquet")
-                .toDF("window", "container_nr", "count");
+                .toDF("window", "container_nr", "containerMeldingId", "dayOfWeek", "count");
         df.printSchema();
 
-        JavaRDD<StortingenModel> df2 = df.javaRDD()
+        JavaRDD<StortingenModel> stortingenModel = df.javaRDD()
                 .map((Function<Row, StortingenModel>) s -> {
                     StortingenModel mlm = new StortingenModel();
                     mlm.setContainerNummer(s.getString(s.fieldIndex("container_nr")));
                     Row row = s.getStruct(s.fieldIndex("window"));
                     Timestamp ts = row.getTimestamp(0);
                     mlm.setDate(ts.toLocalDateTime().toLocalDate());
+                    mlm.setContainerMeldingCategorie(s.getString(s.fieldIndex("containerMeldingId")));
+                    mlm.setDayOfWeek(s.getString(s.fieldIndex("dayOfWeek")));
                     mlm.setCount(s.getLong(s.fieldIndex("count")));
                     return mlm;
                 });
@@ -56,18 +58,19 @@ public class MachineLearningService {
                     Timestamp ts = row.getTimestamp(0);
                     model.setStartDate(ts.toLocalDateTime().toLocalDate());
                     Timestamp ts2 = row.getTimestamp(1);
-                    //model.setCount(s.getLong(s.fieldIndex("count")));
+                    model.setContainerMeldingCategorie(s.getString(s.fieldIndex("containerMeldingId")));
+                    model.setDayOfWeek(s.getString(s.fieldIndex("dayOfWeek")));
                     return model;
                 });
 
         List<LedigingenModel> ledigingenModelList = ledigingenModel.collect();
         ledigingenModelList.stream().forEach(System.out::println);
 
-        List<StortingenModel> list = df2.collect();
-        list.stream().forEach(System.out::println);
+        List<StortingenModel> stortingenModelList = stortingenModel.collect();
+        stortingenModelList.stream().forEach(System.out::println);
 
 
-        // STORTINGEN
+        /*// STORTINGEN
         List<StortingenModel> stortingenList = new ArrayList<>();
         StortingenModel strt1 = buildStortingenModel("466", 26L, LocalDate.of(2018, 12, 5),
                 "STRT");
@@ -120,8 +123,8 @@ public class MachineLearningService {
         ledigingenList.add(ledi4);
         ledigingenList.add(ledi5);
         ledigingenList.add(ledi6);
-
-        List<MachineLearningDomain> model = createMachineLearningModel(stortingenList, ledigingenList);
+*/
+        List<MachineLearningDomain> model = createMachineLearningModel(stortingenModelList, ledigingenModelList);
 
     }
 
@@ -142,8 +145,8 @@ public class MachineLearningService {
             machineLearningDomainList.add(model);
         }
 
-        /*machineLearningDomainList.stream().sorted(Comparator.comparing(MachineLearningDomain::getContainerNummer))
-                .forEach(System.out::println);*/
+        machineLearningDomainList.stream().sorted(Comparator.comparing(MachineLearningDomain::getContainerNummer))
+                .forEach(System.out::println);
         return machineLearningDomainList;
     }
 
@@ -164,7 +167,7 @@ public class MachineLearningService {
                                                 final List<LedigingenModel> ledigingenList) {
         LocalDate endDate = ledigingenList.stream()
                 .filter(lediging -> stortingenModel.getDate().isAfter(lediging.getStartDate())
-                        && stortingenModel.getDate().isBefore(lediging.getEndDate()))
+                        && stortingenModel.getDate() != null && stortingenModel.getDate().isBefore(lediging.getEndDate()))
                 .map(lediging -> lediging.getEndDate())
                 .findFirst().get();
         LocalDate startdate = ledigingenList.stream()
@@ -180,9 +183,9 @@ public class MachineLearningService {
             final String containerNr, final Long count, final LocalDate date,
             final String containerMeldingCategorie) {
         return StortingenModel.builder()
-                .container_nr(containerNr)
+                .containerNummer(containerNr)
                 .count(count)
-                .window(date)
+                .date(date)
                 .containerMeldingCategorie(containerMeldingCategorie)
                 .build();
     }

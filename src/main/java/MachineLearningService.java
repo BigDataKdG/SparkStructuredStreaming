@@ -10,6 +10,9 @@ import java.util.stream.Collectors;
 
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
+import org.apache.spark.mllib.evaluation.RegressionMetrics;
+import org.apache.spark.mllib.linalg.Vector;
+import org.apache.spark.mllib.linalg.Vectors;
 import org.apache.spark.mllib.tree.model.GradientBoostedTreesModel;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
@@ -18,8 +21,6 @@ import org.apache.spark.sql.SparkSession;
 import model.LedigingenModel;
 import model.MachineLearningDomain;
 import model.StortingenModel;
-import scala.collection.JavaConverters;
-import scala.collection.Seq;
 
 public class MachineLearningService {
 
@@ -89,15 +90,27 @@ public class MachineLearningService {
         GradientBoostedTreesModel machineLearningModel = GradientBoostedTreesModel.load(spark.sparkContext(), "target"
                 + "/tmp/myGradientBoostingClassificationModel");
 
-        Seq<MachineLearningDomain> domainSeq =
-                JavaConverters.asScalaIteratorConverter(model.iterator()).asScala().toSeq();
+
+        JavaRDD<Row> javaRDDomain =
+                spark.createDataFrame(model, MachineLearningDomain.class).toJavaRDD();
 
 
+        JavaRDD<Vector> vectors =
+                javaRDDomain.map((Function<Row, Vector>) row ->
+                        Vectors.dense(
+                                ((Integer) row.get(0)).doubleValue(),
+                                ((Long) row.get(2)).doubleValue(),
+                                ((Long) row.get(3)).doubleValue(),
+                                ((Integer) row.get(1)).doubleValue()
+                        ));
 
-        //System.out.println(machineLearningModel.predict(vector));
+        vectors.collect().forEach(System.out::println);
+        //machineLearningModel.predict(vectors);
+        machineLearningModel.predict(vectors).collect().forEach(System.out::println);
+
+        //System.out.println(machineLearningModel.predict(javaVector).first());
 
     }
-
 
     public static List<MachineLearningDomain> createMachineLearningModel(
             List<StortingenModel> stortingenList,
@@ -108,7 +121,7 @@ public class MachineLearningService {
 
         for (StortingenModel stortingenModel : sortedStortingen) {
             MachineLearningDomain model = MachineLearningDomain.builder()
-                    .containerNummer(stortingenModel.getContainerNummer())
+                    .containerNummer(Integer.parseInt(stortingenModel.getContainerNummer()))
                     .volume(stortingenModel.getCount())
                     .volumeSindsLaatsteLediging(getVolumeSindsLaatsteLediging(stortingenModel, sortedStortingen,
                             ledigingenList))

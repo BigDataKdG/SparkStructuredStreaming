@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MachineLearningDomain {
 
     @JsonProperty("containerNummer")
-    private String containerNummer;
+    private Integer containerNummer;
 
     @JsonProperty("volume")
     private Long volume;
@@ -18,7 +18,7 @@ public class MachineLearningDomain {
     @JsonProperty("dayOfWeek")
     private Integer dayOfWeek;
 
-    public MachineLearningDomain(final String containerNummer, final Long volume,
+    public MachineLearningDomain(final Integer containerNummer, final Long volume,
                                  final Long volumeSindsLaatsteLediging, final Integer dayOfWeek) {
         this.containerNummer = containerNummer;
         this.volume = volume;
@@ -26,7 +26,7 @@ public class MachineLearningDomain {
         this.dayOfWeek = dayOfWeek;
     }
 
-    public String getContainerNummer() {
+    public Integer getContainerNummer() {
         return containerNummer;
     }
 
@@ -78,7 +78,7 @@ public class MachineLearningDomain {
     }
 
     public static final class Builder {
-        private String containerNummer;
+        private Integer containerNummer;
         private Long volume;
         private Long volumeSindsLaatsteLediging;
         private Integer dayOfWeek;
@@ -90,7 +90,7 @@ public class MachineLearningDomain {
             return new Builder();
         }
 
-        public Builder containerNummer(String containerNummer) {
+        public Builder containerNummer(Integer containerNummer) {
             this.containerNummer = containerNummer;
             return this;
         }

@@ -93,6 +93,18 @@ public class LedigingenModel implements Serializable {
     }
 
     @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("LedigingenModel{");
+        sb.append("startDate=").append(startDate);
+        sb.append(", endDate=").append(endDate);
+        sb.append(", containerNummer='").append(containerNummer).append('\'');
+        sb.append(", containerMeldingCategorie='").append(containerMeldingCategorie).append('\'');
+        sb.append(", dayOfWeek='").append(dayOfWeek).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
+
+    @Override
     public int hashCode() {
         return Objects.hash(startDate, endDate, containerNummer, containerMeldingCategorie, dayOfWeek);
     }

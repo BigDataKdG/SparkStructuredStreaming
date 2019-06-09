@@ -19,12 +19,24 @@ public class KafkaLedigingenConsumer {
 
         Dataset<Row> ledigingen = readLedigingen(spark, 11);
 
+        String osName = System.getProperties().getProperty("os.name");
+        String path;
+        String checkpointLocation;
+        if (osName.startsWith("Mac")) {
+            path = "/Users/JeBo/";
+            checkpointLocation = "/tmp/";
+        } else {
+            // todo: invullen fred
+            path = "";
+            checkpointLocation = "";
+        }
+
         StreamingQuery query2 = ledigingen.writeStream()
                 .format("parquet")
                 .option("truncate", "false")
-                .option("checkpointLocation", "/tmp/kafka-logs2")
+                .option("checkpointLocation", checkpointLocation + "kafka-logs2")
                 .trigger(Trigger.ProcessingTime(10000))
-                .start("/Users/JeBo/kafka-ledigingen");
+                .start(path + "kafka-ledigingen");
 
         query2.awaitTermination();
     }

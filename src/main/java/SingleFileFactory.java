@@ -12,16 +12,30 @@ public class SingleFileFactory {
                 .config("spark.master", "local")
                 .config("spark.sql.session.timeZone", "UTC")
                 .getOrCreate();
+        String osName = System.getProperties().getProperty("os.name");
+        String stortingenPath;
+        String ledigingenPath;
+        String singleFilePath;
+        if (osName.startsWith("Mac")) {
+            stortingenPath = "/Users/JeBo/kafka-stortingen/";
+            singleFilePath = "/Users/JeBo/single-parquet/";
+            ledigingenPath = "/Users/JeBo/kafka-ledigingen/";
+        } else {
+            // todo: invullen fred
+            stortingenPath = "";
+            singleFilePath = "";
+            ledigingenPath = "";
+        }
 
-        Dataset<Row> stortingen = spark.read().parquet("/Users/JeBo/kafka-stortingen/part-*.snappy.parquet");
+        Dataset<Row> stortingen = spark.read().parquet(stortingenPath + "part-*.snappy.parquet");
 
         stortingen.coalesce(1).write()
-                .format("parquet").save("/Users/JeBo/single-parquet/single-file-stortingen.snappy.parquet");
+                .format("parquet").save(singleFilePath+ "single-file-stortingen.snappy.parquet");
 
-        Dataset<Row> ledigingen = spark.read().parquet("/Users/JeBo/kafka-ledigingen/part-*.snappy.parquet");
+        Dataset<Row> ledigingen = spark.read().parquet(ledigingenPath + "part-*.snappy.parquet");
 
         ledigingen.coalesce(1).write()
-                .format("parquet").save("/Users/JeBo/single-parquet/single-file-ledigingen.snappy.parquet");
+                .format("parquet").save( singleFilePath + "single-file-ledigingen.snappy.parquet");
 
         //df.explain();
         stortingen.show(20, false);

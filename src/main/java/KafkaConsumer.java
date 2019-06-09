@@ -19,6 +19,18 @@ public class KafkaConsumer {
 
         Dataset<Row> stortingen = readStream(spark, 20);
 
+        String osName = System.getProperties().getProperty("os.name");
+        String path;
+        String checkpointLocation;
+        if (osName.startsWith("Mac")) {
+            path = "/Users/JeBo/";
+            checkpointLocation = "/tmp/";
+        } else {
+            // todo: invullen fred
+            path = "";
+            checkpointLocation = "";
+        }
+
         StreamingQuery query = stortingen.writeStream()
                 /* .format("console")
                  .option("numRows", 1000)
@@ -27,9 +39,9 @@ public class KafkaConsumer {
                  .start();*/
                 .format("parquet")
                 .option("truncate", "false")
-                .option("checkpointLocation", "/tmp/kafka-logs")
+                .option("checkpointLocation", checkpointLocation + "kafka-logs")
                 .trigger(Trigger.ProcessingTime(10000))
-                .start("/Users/JeBo/kafka-stortingen");
+                .start( path + "kafka-stortingen");
         query.awaitTermination();
     }
 

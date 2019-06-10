@@ -116,6 +116,8 @@ public class MachineLearningModelTrainer {
                 .config("spark.master", "local")
                 .config("spark.sql.session.timeZone", "UTC")
                 .getOrCreate();
+
+
         Dataset<Row> mlInput = spark.read()
                 .format("libsvm")
                 .load("/Users/JeBo/BigData2/SparkStructuredStreaming/out.txt");
@@ -124,6 +126,7 @@ public class MachineLearningModelTrainer {
                 .setInputCol("label")
                 .setOutputCol("indexedLabel")
                 .fit(mlInput);
+
 // Automatically identify categorical features, and index them.
 // Set maxCategories so features with > 4 distinct values are treated as continuous.
         VectorIndexerModel featureIndexer = new VectorIndexer()
@@ -142,7 +145,8 @@ public class MachineLearningModelTrainer {
                 .setLabelCol("indexedLabel")
                 .setFeaturesCol("indexedFeatures")
                 .setMaxBins(700)
-                .setMaxIter(100);
+                .setMaxIter(100)
+                .setStepSize(0.3);
 
         IndexToString labelConverter = new IndexToString()
                 .setInputCol("prediction")
@@ -159,32 +163,14 @@ public class MachineLearningModelTrainer {
         pipelinepredictions.select("predictedLabel", "label", "features")
                 .show(100, false);
 
-        BinaryClassificationEvaluator evaluator = new BinaryClassificationEvaluator()
+        BinaryClassificationEvaluator rocEvaluator = new BinaryClassificationEvaluator()
+                .setMetricName("areaUnderROC")
                 .setLabelCol("indexedLabel")
                 .setRawPredictionCol("rawPrediction");
 
-        ParamMap[] paramGrid = new ParamGridBuilder()
-                .addGrid(gbt.maxDepth(), new int[] {5, 20})    /*(10, 20, 25, ...)*/
-                .addGrid(gbt.minInstancesPerNode(), new int[] { 5, 10, 15 })
-                .build();
+        double areaUnderROC = rocEvaluator.evaluate(pipelinepredictions);
+        System.out.println("Area under ROC: " + areaUnderROC);
 
-        CrossValidator cv = new CrossValidator()
-                .setEstimator(pipeline)
-                .setEvaluator(evaluator)
-                .setEstimatorParamMaps(paramGrid)
-                .setNumFolds(3)
-                .setParallelism(2);
-
-        CrossValidatorModel cvModel = cv.fit(trainingData);
-        Dataset<Row> predictions = cvModel.transform(testData);
-
-        for (Row r : predictions.select("id", "text", "probability", "prediction").collectAsList()) {
-            System.out.println("(" + r.get(0) + ", " + r.get(1) + ") --> prob=" + r.get(2)
-                    + ", prediction=" + r.get(3));
-        }
-
-        double accuracy = evaluator.evaluate(pipelinepredictions);
-        System.out.println("Test Error = " + (1.0 - accuracy));
 
         GBTClassificationModel gbtModel = (GBTClassificationModel) (model.stages()[2]);
         gbtModel.write().save("target/tmp/GBTClassifierModel");

@@ -1,3 +1,0 @@
-v1
-{"batchWatermarkMs":1522183260000,"batchTimestampMs":1560090792056,"conf":{"spark.sql.shuffle.partitions":"200","spark.sql.streaming.stateStore.providerClass":"org.apache.spark.sql.execution.streaming.state.HDFSBackedStateStoreProvider"}}
-{"stortingen":{"0":22490}}

@@ -18,9 +18,9 @@ public class KafkaProducer {
     private final static String LEDIGINGEN_TOPIC = "ledigingen";
 
     private final static String BOOTSTRAP_SERVER = "localhost:9092";
-    private final static String jdbcUrl = "jdbc:postgresql://localhost:5432/GIS_db";
+    private final static String jdbcUrl = "jdbc:postgresql://localhost:5432/sorteertstraatjes";
     private final static String username = "postgres";
-    private final static String password = "Danny1713";
+    private final static String password = "admin";
 
 // todo: if else : met mijn server
 

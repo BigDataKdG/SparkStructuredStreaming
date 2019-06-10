@@ -7,9 +7,14 @@ import org.apache.spark.sql.streaming.StreamingQuery;
 import org.apache.spark.sql.streaming.Trigger;
 
 public class KafkaConsumer {
+
     private final static String BOOTSTRAP_SERVER = "localhost:9092";
 
     public static void main(String[] args) throws Exception {
+
+       System.setProperty("hadoop.home.dir", "C:\\winutil\\");
+
+
         SparkSession spark = SparkSession
                 .builder()
                 .appName("stortingen")
@@ -17,7 +22,7 @@ public class KafkaConsumer {
                 .config("spark.sql.session.timeZone", "UTC")
                 .getOrCreate();
 
-        Dataset<Row> stortingen = readStream(spark, 20);
+        Dataset<Row> stortingen = readStream(spark, 21);
 
         String osName = System.getProperties().getProperty("os.name");
         String path;
@@ -26,9 +31,8 @@ public class KafkaConsumer {
             path = "/Users/JeBo/";
             checkpointLocation = "/tmp/";
         } else {
-            // todo: invullen fred
-            path = "";
-            checkpointLocation = "";
+            path = "C://";
+            checkpointLocation = "tmp1/";
         }
 
         StreamingQuery query = stortingen.writeStream()

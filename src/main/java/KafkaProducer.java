@@ -18,9 +18,12 @@ public class KafkaProducer {
     private final static String LEDIGINGEN_TOPIC = "ledigingen";
 
     private final static String BOOTSTRAP_SERVER = "localhost:9092";
-    private final static String jdbcUrl = "jdbc:postgresql://localhost:5432/sorteertstraatjes";
+    private final static String jdbcUrl = "jdbc:postgresql://localhost:5432/GIS_db";
     private final static String username = "postgres";
-    private final static String password = "admin";
+    private final static String password = "Danny1713";
+
+// todo: if else : met mijn server
+
 
     public static void main(String[] args) throws Exception {
         Properties props = new Properties();
@@ -44,7 +47,7 @@ public class KafkaProducer {
         String stortingen =
                 "SELECT distinct * FROM public.container WHERE to_date(SPLIT_PART(public.container"
                         + ".datum_tijdstip_containeractiviteit, ' ',1), 'YYYY/MM/DD') BETWEEN"
-                        + "'2018/03/13' AND '2018/03/27' AND (containermelding_id = '20' AND container_nr = '466')";
+                        + "'2018/06/13' AND '2018/06/27' AND (containermelding_id = '20' or containermelding_id = '21') AND ( container_nr = '466' or container_nr = '255' or container_nr = '357' or container_nr = '599') order by 1 desc ";
 
         Connection con = DriverManager.getConnection(jdbcUrl, username, password);
         PreparedStatement st = con.prepareStatement(stortingen);
@@ -70,9 +73,11 @@ public class KafkaProducer {
 
         String ledigingen =
                 "SELECT distinct * FROM public.container WHERE to_date(SPLIT_PART(public.container"
-                        + ".datum_tijdstip_containeractiviteit, ' ', 1), 'YYYY/MM/DD') BETWEEN '2018/03/01' AND "
-                        + "'2018/03/30'"
-                        + "AND (containermelding_id = '11' OR containermelding_id = '77') AND container_nr = '466'";
+                        + ".datum_tijdstip_containeractiviteit, ' ', 1), 'YYYY/MM/DD') BETWEEN '2018/06/01' AND "
+                        + "'2018/06/30'"
+                        + "AND (containermelding_id = '11' OR containermelding_id = '77') AND  (container_nr = '466' or container_nr = '255' or container_nr = '357' or container_nr = '599') order by 1  desc";
+
+
 
         Connection con = DriverManager.getConnection(jdbcUrl, username, password);
         PreparedStatement st2 = con.prepareStatement(ledigingen);

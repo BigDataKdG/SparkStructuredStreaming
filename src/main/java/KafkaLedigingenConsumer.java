@@ -10,6 +10,10 @@ public class KafkaLedigingenConsumer {
     private final static String BOOTSTRAP_SERVER = "localhost:9092";
 
     public static void main(String[] args) throws Exception {
+
+        System.setProperty("hadoop.home.dir", "C:\\winutil\\");
+
+
         SparkSession spark = SparkSession
                 .builder()
                 .appName("test")
@@ -26,9 +30,8 @@ public class KafkaLedigingenConsumer {
             path = "/Users/JeBo/";
             checkpointLocation = "/tmp/";
         } else {
-            // todo: invullen fred
-            path = "";
-            checkpointLocation = "";
+            path = "C://";
+            checkpointLocation = "tmp1/";
         }
 
         StreamingQuery query2 = ledigingen.writeStream()

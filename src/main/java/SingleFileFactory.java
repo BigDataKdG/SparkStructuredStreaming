@@ -6,6 +6,8 @@ public class SingleFileFactory {
 
     public static void main(String[] args) {
 
+        System.setProperty("hadoop.home.dir", "C:\\winutil\\");
+
         SparkSession spark = SparkSession
                 .builder()
                 .appName("test")
@@ -21,10 +23,9 @@ public class SingleFileFactory {
             singleFilePath = "/Users/JeBo/single-parquet/";
             ledigingenPath = "/Users/JeBo/kafka-ledigingen/";
         } else {
-            // todo: invullen fred
-            stortingenPath = "";
-            singleFilePath = "";
-            ledigingenPath = "";
+            stortingenPath = "C://kafka-stortingen/";
+            singleFilePath = "C://single-parquet/";
+            ledigingenPath = "C://kafka-ledigingen/";
         }
 
         Dataset<Row> stortingen = spark.read().parquet(stortingenPath + "part-*.snappy.parquet");
@@ -38,7 +39,7 @@ public class SingleFileFactory {
                 .format("parquet").save( singleFilePath + "single-file-ledigingen.snappy.parquet");
 
         //df.explain();
-        stortingen.show(20, false);
-        ledigingen.show(20);
+        stortingen.show(150, false);
+        ledigingen.show(150);
     }
 }

@@ -1,4 +1,9 @@
 import static java.util.Arrays.asList;
+import static org.apache.spark.sql.functions.col;
+import static org.apache.spark.sql.functions.lit;
+import static org.apache.spark.sql.functions.second;
+import static org.apache.spark.sql.functions.udf;
+import static org.apache.spark.sql.functions.when;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -10,17 +15,24 @@ import java.util.stream.Collectors;
 
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
-import org.apache.spark.mllib.evaluation.RegressionMetrics;
-import org.apache.spark.mllib.linalg.Vector;
-import org.apache.spark.mllib.linalg.Vectors;
-import org.apache.spark.mllib.tree.model.GradientBoostedTreesModel;
+import org.apache.spark.ml.PipelineModel;
+import org.apache.spark.ml.feature.StringIndexer;
+import org.apache.spark.ml.feature.VectorAssembler;
+import org.apache.spark.ml.feature.VectorIndexer;
+import org.apache.spark.ml.linalg.Vector;
+import org.apache.spark.sql.Column;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.expressions.UserDefinedFunction;
+import org.apache.spark.sql.types.ArrayType;
+import org.apache.spark.sql.types.DataTypes;
 
+import model.ContainerPrediction;
 import model.LedigingenModel;
 import model.MachineLearningDomain;
 import model.StortingenModel;
+import scala.collection.Seq;
 
 public class MachineLearningService {
 
@@ -82,35 +94,70 @@ public class MachineLearningService {
         ledigingenModelList.stream().forEach(System.out::println);
 
         List<StortingenModel> stortingenModelList = stortingenModel.collect();
-        stortingenModelList.stream().forEach(System.out::println);
 
+        // todo: check if this filter works
+        //stortingenModelList.stream().filter(strtModel -> strtModel.getDate() == LocalDate.of(2018, 6, 1));
 
         List<MachineLearningDomain> model = createMachineLearningModel(stortingenModelList, ledigingenModelList);
 
-        GradientBoostedTreesModel machineLearningModel = GradientBoostedTreesModel.load(spark.sparkContext(), "target"
-                + "/tmp/myGradientBoostingClassificationModel");
+        Dataset<Row> datasetML = spark.createDataFrame(model, MachineLearningDomain.class);
 
+        PipelineModel pipelineModel = PipelineModel.load("/Users/JeBo/BigData2/SparkStructuredStreaming/target/tmp"
+                + "/PipelineModel");
 
-        JavaRDD<Row> javaRDDomain =
-                spark.createDataFrame(model, MachineLearningDomain.class).toJavaRDD();
+        String[] featureCols = new String[]{"containerNummer", "volumeSindsLaatsteLediging", "volume", "dayOfWeek"};
 
+        VectorAssembler assembler = new VectorAssembler().setInputCols(featureCols).setOutputCol("features");
 
-        JavaRDD<Vector> vectors =
-                javaRDDomain.map((Function<Row, Vector>) row ->
-                        Vectors.dense(
-                                ((Integer) row.get(0)).doubleValue(),
-                                ((Long) row.get(2)).doubleValue(),
-                                ((Long) row.get(3)).doubleValue(),
-                                ((Integer) row.get(1)).doubleValue()
-                        ));
+        System.out.println("NEW DATASET ML PRINT SCHEMA");
 
-        vectors.collect().forEach(System.out::println);
-        //machineLearningModel.predict(vectors);
-        machineLearningModel.predict(vectors).collect().forEach(System.out::println);
+        Dataset<Row> df2 = assembler.transform(datasetML);
+        System.out.println("DF3 PRINT SCHEMA");
 
-        //System.out.println(machineLearningModel.predict(javaVector).first());
+        df2.printSchema();
 
+        Dataset<Row> pipelinepredictions = pipelineModel.transform(df2);
+        System.out.println("PIPELINE PREDICTIONS SCHEMA");
+        pipelinepredictions.printSchema();
+        UserDefinedFunction toarray = udf(
+                (Vector v) -> v.toArray(), new ArrayType(DataTypes.DoubleType, false)
+        );
+
+        List<Row> rows = pipelinepredictions.select(col("predictedLabel"), toarray.apply(col("probability")),
+                col("indexedFeatures"), col("containerNummer"))
+                .collectAsList();
+
+        List<Object> probabilities = rows
+                .stream()
+                .map(row -> row.getSeq(1))
+                .map(row -> row.last())
+                .collect(Collectors.toList());
+        List<Integer> containerNummers = rows.stream()
+                .map(row -> row.getInt(3))
+                .collect(Collectors.toList());
+        List<Double> probabilitiesAsDoubles = new ArrayList<>();
+
+        for (Object obj : probabilities) {
+            probabilitiesAsDoubles.add((Double) obj);
+        }
+
+        List<String> predictedLabels = new ArrayList<>();
+        for (Double prob : probabilitiesAsDoubles) {
+            if (prob > 0.169) {
+                predictedLabels.add("Lediging");
+            } else {
+                predictedLabels.add("Geen lediging");
+            }
+        }
+
+        List<ContainerPrediction> finalList = new ArrayList<>();
+        for (int i = 0; i < containerNummers.size(); i++) {
+            finalList.add(new ContainerPrediction(containerNummers.get(i), probabilitiesAsDoubles.get(i),
+                    predictedLabels.get(i)));
+        }
+        finalList.forEach(System.out::println);
     }
+
 
     public static List<MachineLearningDomain> createMachineLearningModel(
             List<StortingenModel> stortingenList,
@@ -164,83 +211,4 @@ public class MachineLearningService {
                 .findFirst().orElse(LocalDate.MIN);
         return asList(endDate, startdate);
     }
-
-    private static StortingenModel buildStortingenModel(
-            final String containerNr, final Long count, final LocalDate date,
-            final String containerMeldingCategorie) {
-        return StortingenModel.builder()
-                .containerNummer(containerNr)
-                .count(count)
-                .date(date)
-                .containerMeldingCategorie(containerMeldingCategorie)
-                .build();
-    }
-
-    private static LedigingenModel buildLedigingenModel(
-            final String containerNr, final LocalDate startDate, final LocalDate endDate) {
-        return LedigingenModel.builder()
-                .containerNummer(containerNr)
-                .startDate(startDate)
-                .endDate(endDate)
-                .build();
-
-
-    }
-
 }
-
-
-        /*// STORTINGEN
-        List<StortingenModel> stortingenList = new ArrayList<>();
-        StortingenModel strt1 = buildStortingenModel("466", 26L, LocalDate.of(2018, 12, 5),
-                "STRT");
-        StortingenModel strt2 = buildStortingenModel("466", 31L, LocalDate.of(2018, 12, 6),
-                "STRT");
-        StortingenModel strt3 = buildStortingenModel("466", 25L, LocalDate.of(2018, 12, 7),
-                "STRT");
-        StortingenModel strt4 = buildStortingenModel("466", 21L, LocalDate.of(2018, 12, 11),
-                "STRT");
-        StortingenModel strt5 = buildStortingenModel("466", 25L, LocalDate.of(2018, 12, 12),
-                "STRT");
-
-        StortingenModel strt7 = buildStortingenModel("322", 26L, LocalDate.of(2018, 12, 5),
-                "STRT");
-        StortingenModel strt8 = buildStortingenModel("322", 31L, LocalDate.of(2018, 12, 6),
-                "STRT");
-        StortingenModel strt6 = buildStortingenModel("322", 25L, LocalDate.of(2018, 12, 12),
-                "STRT");
-
-        List<LedigingenModel> ledigingenList = new ArrayList<>();
-
-        // LEDIGINGEN
-        LedigingenModel ledi1 = buildLedigingenModel("466", LocalDate.of(2018, 12, 4),
-                LocalDate.of(2018, 12, 10));
-        LedigingenModel ledi2 = buildLedigingenModel("466", LocalDate.of(2018, 12, 10),
-                LocalDate.of(2018, 12, 13));
-        LedigingenModel ledi3 = buildLedigingenModel("466", LocalDate.of(2018, 12, 13),
-                LocalDate.of(2018, 12, 16));
-
-
-        LedigingenModel ledi4 = buildLedigingenModel("322", LocalDate.of(2018, 12, 4),
-                LocalDate.of(2018, 12, 10));
-        LedigingenModel ledi5 = buildLedigingenModel("322", LocalDate.of(2018, 12, 10),
-                LocalDate.of(2018, 12, 13));
-        LedigingenModel ledi6 = buildLedigingenModel("322", LocalDate.of(2018, 12, 13),
-                LocalDate.of(2018, 12, 16));
-
-        stortingenList.add(strt1);
-        stortingenList.add(strt2);
-        stortingenList.add(strt3);
-        stortingenList.add(strt4);
-        stortingenList.add(strt5);
-        stortingenList.add(strt6);
-        stortingenList.add(strt7);
-        stortingenList.add(strt8);
-
-        ledigingenList.add(ledi1);
-        ledigingenList.add(ledi2);
-        ledigingenList.add(ledi3);
-        ledigingenList.add(ledi4);
-        ledigingenList.add(ledi5);
-        ledigingenList.add(ledi6);
-*/

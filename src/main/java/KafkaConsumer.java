@@ -12,8 +12,7 @@ public class KafkaConsumer {
 
     public static void main(String[] args) throws Exception {
 
-       System.setProperty("hadoop.home.dir", "C:\\winutil\\");
-
+        System.setProperty("hadoop.home.dir", "C:\\winutil\\");
 
         SparkSession spark = SparkSession
                 .builder()
@@ -45,7 +44,7 @@ public class KafkaConsumer {
                 .option("truncate", "false")
                 .option("checkpointLocation", checkpointLocation + "kafka-logs")
                 .trigger(Trigger.ProcessingTime(10000))
-                .start( path + "kafka-stortingen");
+                .start(path + "kafka-stortingen");
         query.awaitTermination();
     }
 

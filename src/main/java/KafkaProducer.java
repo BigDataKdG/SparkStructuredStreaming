@@ -47,7 +47,9 @@ public class KafkaProducer {
         String stortingen =
                 "SELECT distinct * FROM public.container WHERE to_date(SPLIT_PART(public.container"
                         + ".datum_tijdstip_containeractiviteit, ' ',1), 'YYYY/MM/DD') BETWEEN"
-                        + "'2018/06/13' AND '2018/06/27' AND (containermelding_id = '20' or containermelding_id = '21') AND ( container_nr = '466' or container_nr = '255' or container_nr = '357' or container_nr = '599') order by 1 desc ";
+                        + "'2018/06/13' AND '2018/06/27' AND (containermelding_id = '20' or containermelding_id = "
+                        + "'21') AND ( container_nr = '466' or container_nr = '255' or container_nr = '357' or "
+                        + "container_nr = '599') order by 1 desc ";
 
         Connection con = DriverManager.getConnection(jdbcUrl, username, password);
         PreparedStatement st = con.prepareStatement(stortingen);
@@ -68,6 +70,7 @@ public class KafkaProducer {
 
         return stortingenList;
     }
+
     private static List<ContainerMelding> retrieveLedigingenFromDb(int counter) throws SQLException {
         List<ContainerMelding> ledigingenList = new ArrayList<>();
 
@@ -75,8 +78,8 @@ public class KafkaProducer {
                 "SELECT distinct * FROM public.container WHERE to_date(SPLIT_PART(public.container"
                         + ".datum_tijdstip_containeractiviteit, ' ', 1), 'YYYY/MM/DD') BETWEEN '2018/06/01' AND "
                         + "'2018/06/30'"
-                        + "AND (containermelding_id = '11' OR containermelding_id = '77') AND  (container_nr = '466' or container_nr = '255' or container_nr = '357' or container_nr = '599') order by 1  desc";
-
+                        + "AND (containermelding_id = '11' OR containermelding_id = '77') AND  (container_nr = '466' "
+                        + "or container_nr = '255' or container_nr = '357' or container_nr = '599') order by 1  desc";
 
 
         Connection con = DriverManager.getConnection(jdbcUrl, username, password);
@@ -103,7 +106,7 @@ public class KafkaProducer {
             List<ContainerMelding> meldingenList,
             final Producer<Integer, ContainerMelding> kafkaProducer) {
         //Collections.sort(meldingenList,
-            //    (o1, o2) -> o2.getContainerActiviteit().compareTo(o1.getContainerActiviteit()));
+        //    (o1, o2) -> o2.getContainerActiviteit().compareTo(o1.getContainerActiviteit()));
         for (ContainerMelding melding : meldingenList) {
             System.out.println(melding);
             kafkaProducer.send(new ProducerRecord(STORTINGEN_TOPIC, 0, melding));

@@ -58,7 +58,6 @@ public class MachineLearningService {
         List<ContainerPrediction> containerPredictions = prepareDatasetForExtraction(pipelinepredictions);
 
         containerPredictions.forEach(System.out::println);
-
     }
 
     private static List<ContainerPrediction> prepareDatasetForExtraction(final Dataset<Row> pipelinepredictions) {

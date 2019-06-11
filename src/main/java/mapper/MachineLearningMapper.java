@@ -90,9 +90,6 @@ public class MachineLearningMapper {
                     .build();
             machineLearningDomainList.add(model);
         }
-
-        machineLearningDomainList.stream().sorted(Comparator.comparing(MachineLearningDomain::getContainerNummer))
-                .forEach(System.out::println);
         return machineLearningDomainList;
     }
 

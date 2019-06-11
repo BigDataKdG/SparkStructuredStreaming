@@ -29,9 +29,9 @@ public class KafkaLedigingenConsumer {
         StreamingQuery query2 = ledigingen.writeStream()
                 .format("parquet")
                 .option("truncate", "false")
-                .option("checkpointLocation", "/kafka-logs2")
+                .option("checkpointLocation", "kafka-logs2")
                 .trigger(Trigger.ProcessingTime(10000))
-                .start( "/kafka-ledigingen");
+                .start( "kafka-ledigingen");
 
         query2.awaitTermination();
     }

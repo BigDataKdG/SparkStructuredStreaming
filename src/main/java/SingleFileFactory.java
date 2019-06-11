@@ -20,14 +20,14 @@ public class SingleFileFactory {
                 .config("spark.sql.session.timeZone", "UTC")
                 .getOrCreate();
 
-        Dataset<Row> stortingen = spark.read().parquet("/kafka-stortingen/part-*.snappy.parquet");
+        Dataset<Row> stortingen = spark.read().parquet("kafka-stortingen/part-*.snappy.parquet");
 
         stortingen.coalesce(1).write()
-                .format("parquet").save( "/single-parquet/single-file-stortingen.snappy.parquet");
+                .format("parquet").save( "single-parquet/single-file-stortingen.snappy.parquet");
 
-        Dataset<Row> ledigingen = spark.read().parquet("/kafka-ledigingen/part-*.snappy.parquet");
+        Dataset<Row> ledigingen = spark.read().parquet("kafka-ledigingen/part-*.snappy.parquet");
 
         ledigingen.coalesce(1).write()
-                .format("parquet").save("/single-parquet/single-file-ledigingen.snappy.parquet");
+                .format("parquet").save("single-parquet/single-file-ledigingen.snappy.parquet");
     }
 }

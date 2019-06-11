@@ -4,3 +4,8 @@
 target/
 
 !target/tmp
+
+kafka-ledigingen/
+kafka-logs/
+kafka-logs2/
+kafka-stortingen/

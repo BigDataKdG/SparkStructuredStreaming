@@ -34,11 +34,11 @@ public class MachineLearningService {
                 .getOrCreate();
 
         Dataset<Row> stortingen = spark.read()
-                .parquet("/single-parquet/single-file-stortingen.snappy.parquet")
+                .parquet("single-parquet/single-file-stortingen.snappy.parquet")
                 .toDF("window", "container_nr", "containerMeldingId", "dayOfWeek", "count");
 
         Dataset<Row> ledigingen = spark.read()
-                .parquet("/single-parquet/single-file-ledigingen.snappy.parquet")
+                .parquet("single-parquet/single-file-ledigingen.snappy.parquet")
                 .toDF("window", "container_nr", "containerMeldingId", "dayOfWeek", "count");
 
         List<MachineLearningDomain> machineLearningDomain = MachineLearningMapper.machineLearningMapper(stortingen,

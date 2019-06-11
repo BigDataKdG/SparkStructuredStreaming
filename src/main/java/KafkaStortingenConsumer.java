@@ -28,9 +28,9 @@ public class KafkaStortingenConsumer {
         StreamingQuery query = stortingen.writeStream()
                 .format("parquet")
                 .option("truncate", "false")
-                .option("checkpointLocation", "/kafka-logs")
+                .option("checkpointLocation", "kafka-logs")
                 .trigger(Trigger.ProcessingTime(10000))
-                .start( "/kafka-stortingen");
+                .start( "kafka-stortingen");
         query.awaitTermination();
     }
 

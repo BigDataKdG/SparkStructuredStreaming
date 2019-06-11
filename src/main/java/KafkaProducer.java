@@ -18,11 +18,7 @@ public class KafkaProducer {
     private final static String LEDIGINGEN_TOPIC = "ledigingen";
 
     private final static String BOOTSTRAP_SERVER = "localhost:9092";
-    private final static String jdbcUrl = "jdbc:postgresql://localhost:5432/sorteertstraatjes";
-    private final static String username = "postgres";
-    private final static String password = "admin";
-
-// todo: if else : met mijn server
+    private final static String jdbcUrl = "jdbc:postgresql://localhost:5432/";
 
 
     public static void main(String[] args) throws Exception {
@@ -41,7 +37,8 @@ public class KafkaProducer {
 
 
     private static List<ContainerMelding> getContainerMeldingen(final String typeMelding) throws Exception {
-        Connection con = DriverManager.getConnection(jdbcUrl, username, password);
+        Connection con = DriverManager.getConnection(jdbcUrl + System.getenv("DATABASE_NAME"), System.getenv(
+                "USERNAME"), System.getenv("PASSWORD"));
 
         String query = getQuery(typeMelding);
 
@@ -74,7 +71,7 @@ public class KafkaProducer {
                     + ".datum_tijdstip_containeractiviteit, ' ',1), 'YYYY/MM/DD') BETWEEN"
                     + "'2018/06/13' AND '2018/06/27' AND (containermelding_id = '20' or containermelding_id = "
                     + "'21') AND ( container_nr = '466' or container_nr = '255' or container_nr = '357' or "
-                    + "container_nr = '599') order by 1 desc ";
+                    + "container_nr = '599') order by 1 desc";
         }
         return "SELECT distinct * FROM public.container WHERE to_date(SPLIT_PART(public.container"
                 + ".datum_tijdstip_containeractiviteit, ' ', 1), 'YYYY/MM/DD') BETWEEN '2018/06/01' AND "

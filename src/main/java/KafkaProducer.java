@@ -83,9 +83,10 @@ public class KafkaProducer {
     private static void sendToKafka(
             List<ContainerMelding> meldingenList,
             final Producer<Integer, ContainerMelding> kafkaProducer,
-            String topic) {
+            String topic) throws Exception {
         for (ContainerMelding melding : meldingenList) {
             System.out.println(melding);
+            Thread.sleep(1000);
             kafkaProducer.send(new ProducerRecord(topic, 0, melding));
         }
     }

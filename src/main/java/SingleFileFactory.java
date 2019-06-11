@@ -29,5 +29,8 @@ public class SingleFileFactory {
 
         ledigingen.coalesce(1).write()
                 .format("parquet").save("single-parquet/single-file-ledigingen.snappy.parquet");
+
+        stortingen.show(200, false);
+        ledigingen.show(200, false);
     }
 }

@@ -16,8 +16,8 @@ In order to run the KafkaProducer, add the following environment variables (e.g.
 
 Finally, when the data is processed, we can run the SingleFileFactory. 
 
-There is a trained Machine Learning model in the target/tmp folder, but it is possible to delete this and train the 
-model again in the MachineLearningModelTrainer class. This model is used in the final stage of this project, the 
+You can train the Machine Learning model in the MachineLearningModelTrainer class. The trained Machine Learning model
+ will be available in the target/tmp folder. This model is used in the final stage of this project, the 
 MachineLearingService. The output says whether or not the container has to be emptied the day after, based on the 
 trained model. 
 

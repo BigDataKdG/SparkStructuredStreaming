@@ -30,7 +30,6 @@ public class KafkaLedigingenConsumer {
                 .format("parquet")
                 .option("truncate", "false")
                 .option("checkpointLocation", "kafka-logs2")
-                .trigger(Trigger.ProcessingTime(10000))
                 .start( "kafka-ledigingen");
 
         query2.awaitTermination();

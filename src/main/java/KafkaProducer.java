@@ -3,6 +3,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
@@ -35,7 +36,6 @@ public class KafkaProducer {
         sendToKafka(getContainerMeldingen("stortingen"), kafkaProducer, STORTINGEN_TOPIC);
     }
 
-
     private static List<ContainerMelding> getContainerMeldingen(final String typeMelding) throws Exception {
         Connection con = DriverManager.getConnection(jdbcUrl + System.getenv("DATABASE_NAME"), System.getenv(
                 "USERNAME"), System.getenv("PASSWORD"));
@@ -61,7 +61,6 @@ public class KafkaProducer {
         } catch (Exception ex) {
 
         }
-
         return containerMeldingen;
     }
 
@@ -69,15 +68,15 @@ public class KafkaProducer {
         if (typeMelding.equals("stortingen")) {
             return "SELECT distinct * FROM public.container WHERE to_date(SPLIT_PART(public.container"
                     + ".datum_tijdstip_containeractiviteit, ' ',1), 'YYYY/MM/DD') BETWEEN"
-                    + "'2018/06/13' AND '2018/06/27' AND (containermelding_id = '20' or containermelding_id = "
-                    + "'21') AND ( container_nr = '466' or container_nr = '255' or container_nr = '357' or "
-                    + "container_nr = '599') order by 1 desc";
+                    + "'2018/08/01' AND '2018/08/31' AND (containermelding_id = '20' or containermelding_id = "
+                    + "'21') AND (container_nr = '255' or container_nr = '357' or "
+                    + "container_nr = '599') order by 1 asc";
         }
         return "SELECT distinct * FROM public.container WHERE to_date(SPLIT_PART(public.container"
-                + ".datum_tijdstip_containeractiviteit, ' ', 1), 'YYYY/MM/DD') BETWEEN '2018/06/01' AND "
-                + "'2018/06/30'"
-                + "AND (containermelding_id = '11' OR containermelding_id = '77') AND  (container_nr = '466' "
-                + "or container_nr = '255' or container_nr = '357' or container_nr = '599') order by 1  desc";
+                + ".datum_tijdstip_containeractiviteit, ' ', 1), 'YYYY/MM/DD') BETWEEN '2018/08/01' AND "
+                + "'2018/08/31'"
+                + "AND (containermelding_id = '11' OR containermelding_id = '77') AND  ("
+                + "container_nr = '255' or container_nr = '357' or container_nr = '599') order by 1  asc";
     }
 
     private static void sendToKafka(
@@ -86,7 +85,7 @@ public class KafkaProducer {
             String topic) throws Exception {
         for (ContainerMelding melding : meldingenList) {
             System.out.println(melding);
-            Thread.sleep(1000);
+
             kafkaProducer.send(new ProducerRecord(topic, 0, melding));
         }
     }

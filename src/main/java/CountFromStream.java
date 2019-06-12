@@ -24,7 +24,7 @@ public class CountFromStream {
                 .selectExpr("timestamp as timestamp", "container_nummer as container_nummer", "date as date",
                         "containerMeldingId as containerMeldingId", "split(dayOfWeek, '}')[0] as dayOfWeek")
                 .where("containerMeldingId == '" + containerMeldingId + "'")
-                .withWatermark("timestamp", "1 minutes")
+                .withWatermark("timestamp", "500 milliseconds")
                 .groupBy(
                         functions.window(new Column("timestamp"), "1 day", "1 day"),
                         new Column("container_nummer"),

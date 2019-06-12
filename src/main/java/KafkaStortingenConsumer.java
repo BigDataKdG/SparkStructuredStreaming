@@ -29,7 +29,6 @@ public class KafkaStortingenConsumer {
                 .format("parquet")
                 .option("truncate", "false")
                 .option("checkpointLocation", "kafka-logs")
-                .trigger(Trigger.ProcessingTime(10000))
                 .start( "kafka-stortingen");
         query.awaitTermination();
     }
